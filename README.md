@@ -232,4 +232,240 @@ git branch -M main
 
 ***
 
-**Шаг 1 завершен.** У нас есть чистое, оптимизированное Rails backend ядро.
+## Часть 2: Экосистема Качества (RSpec + RuboCop + Annotate)
+
+Фундамент заложен, но необходимо наладить систему контроля качества. Мы сделаем так, чтобы любой новый код в 
+нашем проекте автоматически проверялся на соответствие стандартам, а тесты писались легко и приятно и авто генерация 
+документации для моделей работала.
+
+В этой части мы настроим **RSpec** (тестирование), **RuboCop** (линтинг) и **Annotate** (документация).
+
+### 1. Инициализация RSpec
+Мы отказались от Minitest в пользу RSpec. Теперь нужно создать его конфигурационные файлы.
+
+Выполните команду:
+```bash
+bin/rails generate rspec:install
+```
+Это создаст папку `spec/` и базовые конфиги. Однако стандартные настройки слишком "шумные" и не включают нужные
+нам инструменты (SimpleCov, FactoryBot). Мы перепишем их начисто.
+
+#### Настройка `.rspec`
+Этот файл отвечает за параметры запуска тестов. Мы хотим видеть красивый цветной вывод.
+
+Откройте `.rspec` и настройте на ваше усмотрение. Я, обычно, использую такой набор аргументов.
+```text
+--format documentation
+--color
+--require rails
+```
+
+#### Настройка `spec/rails_helper.rb`
+Это главный файл конфигурации тестов. Мы настроим его так, чтобы он:
+1.  Запускал **SimpleCov** (покрытие кода) *до* загрузки Rails.
+2.  Фильтровал лишнее из отчетов.
+3.  Подключал **FactoryBot** (чтобы писать `create(:user)` вместо `FactoryBot.create(:user)`).
+4.  Подключал хелперы **Inertia** (для тестирования компонентов).
+
+Полностью замените содержимое `spec/rails_helper.rb` на следующее:
+
+```ruby
+# frozen_string_literal: true
+
+require 'spec_helper'
+require 'simplecov'
+
+# Запуск анализа покрытия кода
+SimpleCov.start 'rails' do
+  # Исключаем из отчета технические директории
+  add_filter '/bin/'
+  add_filter '/db/'
+  add_filter '/spec/'
+  add_filter '/config/'
+  
+  # Группируем файлы в отчете для удобства
+  add_group 'Controllers', 'app/controllers'
+  add_group 'Models', 'app/models'
+  add_group 'Mailers', 'app/mailers'
+  add_group 'Libraries', 'lib'
+end
+
+ENV['RAILS_ENV'] ||= 'test'
+require_relative '../config/environment'
+
+# Защита от запуска тестов на боевой базе
+abort('The Rails environment is running in production mode!') if Rails.env.production?
+
+require 'rspec/rails'
+require 'inertia_rails/rspec'
+
+begin
+  ActiveRecord::Migration.maintain_test_schema!
+rescue ActiveRecord::PendingMigrationError => e
+  abort e.to_s.strip
+end
+
+RSpec.configure do |config|
+  # Указываем путь к фикстурам (хотя мы будем использовать фабрики)
+  config.fixture_paths = [Rails.root.join('spec/fixtures')]
+  
+  # Транзакционные тесты: база очищается после каждого теста
+  config.use_transactional_fixtures = true
+  
+  # Убираем лишний шум из стек-трейсов
+  config.filter_rails_from_backtrace!
+  
+  # Подключаем синтаксис FactoryBot (create, build, attributes_for)
+  config.include FactoryBot::Syntax::Methods
+end
+```
+
+> **Note:** **Важно.** Это минимальный рабочий конфиг, далее уже зависит от вашего проекта и предпочтений.
+
+Не забудьте добавить папку покрытия в `.gitignore`, чтобы отчеты не летели в репозиторий:
+```bash
+
+echo "coverage" >> .gitignore
+```
+
+### 2. Настройка RuboCop (Линтер)
+RuboCop "из коробки" может быть слишком строгим или, наоборот, пропускать важное. Мы настроим сбалансированный конфиг,
+который помогает поддерживать чистоту кода, но не душит бюрократией.
+
+Создайте файл `.rubocop.yml` в корне проекта:
+
+```yaml
+plugins:
+  - rubocop-rails
+  - rubocop-rspec
+  - rubocop-performance
+
+AllCops:
+  TargetRubyVersion: 3.4
+  NewCops: enable
+  SuggestExtensions: false
+  Exclude:
+    - 'bin/**/*'
+    - 'db/**/*' # Схемы и миграции часто не проходят проверку, и это нормально
+    - 'tmp/**/*'
+    - 'config/initializers/**/*' # В инициалайзерах часто специфичный DSL
+    - 'node_modules/**/*'
+    - 'vendor/**/*'
+
+# Rails specific
+Rails/UnknownEnv:
+  Environments:
+    - production
+    - development
+    - test
+    - staging
+
+# Documentation: В проектах с быстрым темпом 100% документация классов часто избыточна
+Style/Documentation:
+  Enabled: false
+
+# Frozen String: В Ruby 3+ это норма, но явное указание полезно
+Style/FrozenStringLiteralComment:
+  Enabled: true
+
+# RSpec: Даем тестам чуть больше свободы
+RSpec/ExampleLength:
+  Max: 20 # Интеграционные тесты могут быть длиннее юнитов
+
+RSpec/MultipleExpectations:
+  Max: 5 # Проверка статуса, заголовков и тела ответа в одном тесте - это ок
+
+# Layout: Современные мониторы широкие
+Layout/LineLength:
+  Max: 120
+```
+
+> **Note:** **Так же,** вы можете настроить это под свои предпочтения.
+
+### 3. Настройка Генераторов (Чистая Архитектура)
+Мы хотим, чтобы команда `rails g model User` создавала только нужные файлы, а не кучу мусора
+(ассеты, хелперы, тесты вьюх), который мы не используем, так как весь фронт у нас на React.
+
+Откройте `config/application.rb` и добавьте этот блок настройки внутри класса `YourApplication`:
+
+```ruby
+    # ... внутри class YourApplication < Rails::Application ...
+
+    # Настройка генераторов для чистоты проекта
+    config.generators do |g|
+      g.test_framework :rspec,
+                       fixtures: true,
+                       view_specs: false,    # В Inertia вьюхи тестируются через JS-тесты или системные
+                       helper_specs: false,  # Хелперы редко нужны, логику лучше держать в моделях
+                       routing_specs: false, # Роутинг проверяется в request specs
+                       request_specs: true   # Наш основной инструмент тестирования API
+
+      g.fixture_replacement :factory_bot, dir: "spec/factories"
+
+      g.stylesheets false      # Стили в Tailwind (Vite)
+      g.javascripts false      # JS в React (Vite)
+      g.helper false           # Глобальные хелперы не нужны
+      g.channel assets: false  # Каналы без лишних файлов
+    end
+```
+
+> **Note:** **Возможно** вы захотите как-то это изменить, на ваше усмотрение.
+
+### 4. Настройка Annotate (Документация БД)
+Гем `annotate` позволяет автоматически добавлять комментарии со схемой таблицы в начало каждого файла модели.
+Это очень удобно: открыл модель, например `User.rb`, и сразу видишь, какие у неё есть поля.
+
+Установим автозапуск аннотаций. Выполните:
+```bash
+
+bin/rails g annotate:install
+```
+
+Это создаст файл `lib/tasks/auto_annotate_models.rake`. Его дефолтные настройки хороши, но убедитесь, 
+что `Annotate.load_tasks` вызывается в конце, если вы хотите запускать его вручную. Основная магия происходит
+автоматически после `db:migrate` в development окружении.
+
+### 5. Проверка системы
+Теперь, когда все настроено, давайте убедимся, что система работает.
+
+1.  **Проверка линтера:**
+    ```bash
+    
+    bundle exec rubocop
+    ```
+    Скорее всего, он найдет "нарушения" в автосгенерированных файлах (например, двойные кавычки).
+    Исправьте их автоматически:
+    ```bash
+    
+    bundle exec rubocop -A
+    ```
+
+2.  **Проверка тестов:**
+    ```bash
+    
+    bundle exec rspec
+    ```
+    Вы должны увидеть `No examples found`, но команда должна завершиться успешно (зеленым цветом).
+    Это значит, RSpec готов к работе.
+
+3.  **Проверка безопасности (Brakeman):**
+    ```bash
+
+    bundle exec brakeman
+    ```
+    Вы должны увидеть отчет `No warnings found`. Это значит, что базовый конфиг Rails безопасен. 
+    Прелесть Brakeman в том, что он не требует настройки, просто работает “из коробки”.
+
+4.  **Фиксация результата:**
+    ```bash
+    
+    git add .
+    git commit -m "Setup Quality Ecosystem: RSpec, RuboCop, SimpleCov"
+    ```
+
+***
+
+Поздравляю!
+
+**Шаг 2 завершен.** Наш Backend теперь представляет собой профессиональную среду разработки. Он защищен тестами,
+код проверяется на стандарты, генераторы теперь наши помощники.

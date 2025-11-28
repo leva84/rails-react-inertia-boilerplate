@@ -1,8 +1,43 @@
-# Omakase Ruby styling for Rails
-inherit_gem: { rubocop-rails-omakase: rubocop.yml }
+plugins:
+  - rubocop-rails
+  - rubocop-rspec
+  - rubocop-performance
 
-# Overwrite or add rules to create your own house style
-#
-# # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
-# Layout/SpaceInsideArrayLiteralBrackets:
-#   Enabled: false
+AllCops:
+  TargetRubyVersion: 3.4
+  NewCops: enable
+  SuggestExtensions: false
+  Exclude:
+    - 'bin/**/*'
+    - 'db/**/*'
+    - 'tmp/**/*'
+    - 'config/initializers/**/*'
+    - 'node_modules/**/*'
+    - 'vendor/**/*'
+
+# Rails specific
+Rails/UnknownEnv:
+  Environments:
+    - production
+    - development
+    - test
+    - staging # Часто бывает нужен
+
+# Documentation is good, but not enforced everywhere for boilerplate
+Style/Documentation:
+  Enabled: false
+
+# String literals frozen by default in Ruby 3+, but explicit is fine
+Style/FrozenStringLiteralComment:
+  Enabled: true
+
+# RSpec configuration
+RSpec/ExampleLength:
+  Max: 20 # Даем чуть больше свободы для интеграционных тестов
+
+RSpec/MultipleExpectations:
+  Max: 5 # В request-спеках часто проверяем статус + тело + заголовки
+
+# Line length (modern monitors are wide)
+Layout/LineLength:
+  Max: 120
