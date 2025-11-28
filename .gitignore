@@ -34,3 +34,4 @@
 /config/master.key
 .idea
 config/database.yml
+coverage
