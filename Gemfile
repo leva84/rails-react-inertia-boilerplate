@@ -6,7 +6,7 @@ source 'https://rubygems.org'
 gem 'bootsnap', require: false
 gem 'pg', '~> 1.1'
 gem 'puma', '>= 5.0'
-gem 'rails', '~> 8.0.4'
+gem 'rails', '~> 8.1.1'
 
 # --- Rails 8 Solid Stack (No Redis needed!) ---
 # Эти гемы позволяют хранить кэш, очереди и сокеты прямо в Postgres.
