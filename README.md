@@ -469,3 +469,145 @@ bin/rails g annotate:install
 
 **Шаг 2 завершен.** Наш Backend теперь представляет собой профессиональную среду разработки. Он защищен тестами,
 код проверяется на стандарты, генераторы теперь наши помощники.
+
+***
+
+## Часть 3: Фронтенд-Революция (React + Vite + Inertia)
+
+Времена, когда интеграция React в Rails занимала часы и требовала правки десятков конфигов, прошли. В 2025 году инструменты стали настолько умными, что понимают друг друга с полуслова.
+
+В этой части мы одной командой развернем полноценный современный фронтенд-стек, а затем "отполируем" его настройки для идеальной работы.
+
+### 1. Магическая команда
+Убедитесь, что вы находитесь в корне проекта.
+И так, нам не нужно ставить Vite или React вручную. Гем `inertia_rails`, который мы добавили ранее,
+имеет мощнейший инсталлятор.
+
+Просто выполните:
+```bash
+
+bin/rails g inertia:install
+```
+
+Теперь внимательно следите за вопросами в терминале и отвечайте на них:
+
+1.  **"Could not find a package.json... Would you like to install Vite Ruby?"** -> `y` (Да!)
+  *   *Генератор понял, что у нас нет сборщика, и сам предложил поставить Vite.*
+2.  **"Would you like to use TypeScript?"** -> `n` (Нет)
+  *   *Для старта выбираем JS. Если вы гуру TS — выбирайте `y`.*
+3.  **"Would you like to install Tailwind CSS?"** -> `y` (Да!)
+  *   *Tailwind установится и настроится автоматически.*
+4.  **"What framework do you want to use with Inertia?"** -> `react`
+  *   *Выбираем наш UI-движок.*
+5.  **"Overwrite bin/dev?"** -> `y` (Да!)
+  *   *Генератор обновит скрипт запуска, чтобы он поднимал и Rails, и Vite одной командой.*
+
+**Все !!!**
+
+> А че так можно было ?
+
+### 2. Полировка и Тонкая настройка
+Генератор сделал 90% работы, но оставил несколько моментов, которые мы, как перфекционисты, должны исправить.
+
+#### Убираем лишние entrypoints
+Генератор создал `app/frontend/entrypoints/inertia.jsx` (наша реальная точка входа) и оставил дефолтный `app/frontend/entrypoints/application.js` (от Vite). Последний нам не нужен, так как он будет только путать.
+
+Удалите файл `app/frontend/entrypoints/application.js`.
+
+Теперь откройте `app/views/layouts/application.html.erb` и приведите секцию `<head>` к такому чистому виду:
+
+```erb
+  <head>
+    <title data-inertia><%= content_for(:title) || "Rails React Inertia Boilerplate" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+
+    <%# Подключаем стили через Vite (так они будут hot-reloaded) %>
+    <%= vite_stylesheet_tag "application" %> 
+    
+    <%# Подключаем React HMR и нашу точку входа %>
+    <%= vite_react_refresh_tag %>
+    <%= vite_client_tag %>
+    <%= vite_javascript_tag "inertia.jsx" %>
+    
+    <%# SSR head (если понадобится в будущем) %>
+    <%= inertia_ssr_head %>
+  </head>
+```
+> **Note:** **Обратите внимание:** Мы убрали `vite_javascript_tag 'application'`, оставив только `inertia.jsx`. Это делает загрузку понятной и предсказуемой.
+
+#### Базовый контроллер Inertia
+Генератор создал файл `app/controllers/inertia_controller.rb`. Это базовый контроллер, от которого должны наследоваться все контроллеры, использующие React.
+
+Откройте его и убедитесь, что он выглядит так:
+```ruby
+# frozen_string_literal: true
+
+class InertiaController < ApplicationController
+  # Автоматически прокидываем flash-сообщения (notice, alert) в React-пропсы
+  inertia_share flash: -> { flash.to_hash }
+end
+```
+Теперь, создавая новые контроллеры для фронтенда, наследуйтесь от `InertiaController`, а не от `ApplicationController`.
+
+#### Настройка Procfile.dev
+Откройте файл `Procfile.dev` в корне. Он управляет процессами разработки.
+Давайте сделаем его более понятным:
+
+```yaml
+# 1. Rails (Главный процесс).
+# RUBY_DEBUG_OPEN=true включает удаленную отладку.
+# Так как foreman перехватывает ввод, мы не можем писать команды прямо тут.
+# Но с этим флагом можно подключиться к дебагер из соседнего терминала: rdbg -a
+# Просто предварительно поставьте где-то в коде точку останова `debugger`.
+web: env RUBY_DEBUG_OPEN=true bin/rails server
+
+# 2. Vite (Сборщик фронтенда).
+# Запускается параллельно и обновляет JS/CSS на лету (HMR).
+vite: bin/vite dev
+```
+> **Note:** **Почему `web` первый?** Это конвенция. Если главный процесс (Rails) упадет, foreman остановит и Vite.
+
+#### Роутинг
+В `config/routes.rb` генератор добавил полезный блок для перенаправления с 127.0.0.1 на localhost (чтобы Vite не ругался на CORS). Оставьте его, это полезно:
+
+```ruby
+Rails.application.routes.draw do
+  # Redirect to localhost from 127.0.0.1 to use same IP address with Vite server
+  constraints(host: '127.0.0.1') do
+    get '(*path)', to: redirect { |params, req| "#{req.protocol}localhost:#{req.port}/#{params[:path]}" }
+  end
+
+  # Демо-роуты, полезны для проверки работы фронтенда (можно удалить позже)
+  root 'inertia_example#index'
+  get 'inertia-example', to: 'inertia_example#index'
+end
+```
+
+### 3. Запуск
+Все готово. Запустите сервер разработки:
+
+```bash
+
+bin/dev
+```
+Откройте `http://localhost:3000`. Вы увидите работающее приложение.
+
+Поздравляю!
+
+### 4. Фиксация
+Зафиксируем нашу победу:
+```bash
+
+git add .
+git commit -m "Frontend Setup: Vite + React + Inertia (Auto-generated & Polished)"
+```
+
+***
+
+**Шаг 3 завершен.** Мы получили работающий фронтенд, настроенный по уму.
+Остался финальный рывок — **Шаг 4: Экосистема Качества Фронтенда**. 
+Там мы настроим ESLint, Prettier и структуру папок, чтобы писать код было приятно.
