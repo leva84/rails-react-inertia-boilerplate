@@ -35,6 +35,18 @@ but with the simplicity of a classic Rails monolith.
 
 ---
 
+### Table of Contents
+
+*   [**Part 1: The Foundation (Rails 8 Core)**](#part-1-the-foundation-rails-8-core)
+*   [**Part 2: Quality Ecosystem (RSpec + RuboCop + Annotate)**](#part-2-quality-ecosystem-rspec--rubocop--annotate)
+*   [**Part 3: Frontend Revolution (React + Vite + Inertia)**](#part-3-frontend-revolution-react--vite--inertia)
+*   [**Part 4: Frontend Quality Ecosystem and Structure**](#part-4-frontend-quality-ecosystem-and-structure)
+*   [**Part 5: Final Accord (Frontend Testing)**](#part-5-final-accord-frontend-testing)
+*   [**Conclusion**](#conclusion)
+
+---
+
+
 ## Part 1: The Foundation (Rails 8 Core)
 
 Any scalable project begins with a clean slate. We won't drag along "magic" that we don't plan to use. In this part, we create the application core, ideally prepared for a modern SPA on React.
@@ -1298,6 +1310,17 @@ This template is the ideal starting point for any SaaS, marketplace, or complex 
 - **Frontend:** React 19, Vite (мгновенный HMR), TailwindCSS v4.
 - **Контроль качества:** Настроенные RuboCop, ESLint, Prettier, Vitest.
 - **Архитектура:** Чистая структура папок, готовая к росту.
+
+---
+
+### Содержание
+
+*   [**Часть 1: Фундамент (Rails 8 Core)**](#часть-1-фундамент-rails-8-core)
+*   [**Часть 2: Экосистема Качества (RSpec + RuboCop + Annotate)**](#часть-2-экосистема-качества-rspec--rubocop--annotate)
+*   [**Часть 3: Фронтенд-Революция (React + Vite + Inertia)**](#часть-3-фронтенд-революция-react--vite--inertia)
+*   [**Часть 4: Экосистема Качества Фронтенда и Структура**](#часть-4-экосистема-качества-фронтенда-и-структура)
+*   [**Часть 5: Финальный Аккорд (Тестирование Фронтенда)**](#часть-5-финальный-аккорд-тестирование-фронтенда)
+*   [**Заключение**](#заключение)
 
 ---
 
