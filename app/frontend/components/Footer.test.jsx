@@ -7,10 +7,10 @@ describe('Footer', () => {
 
     const currentYear = new Date().getFullYear()
 
-    // Проверяем, что текст копирайта присутствует
+    // Check that the copyright text is present
     expect(screen.getByText(/RailsReactInertiaBoilerplate/i)).toBeInTheDocument()
 
-    // Проверяем, что год актуальный
+    // Check that the year is current
     expect(screen.getByText(new RegExp(currentYear.toString()))).toBeInTheDocument()
   })
 })

@@ -14,7 +14,7 @@ createInertiaApp({
       console.error(`Missing Inertia page component: '${name}.jsx'`)
     }
 
-    // Магия: Если у страницы нет своего layout, назначаем MainLayout
+    // Magic: If the page doesn't have its own layout, assign MainLayout
     page.default.layout = page.default.layout || ((page) => <MainLayout>{page}</MainLayout>)
 
     return page
@@ -44,8 +44,8 @@ createInertiaApp({
   } else {
     console.error(
       'Missing root element.\n\n' +
-        'If you see this error, it probably means you loaded Inertia.js on non-Inertia pages.\n' +
-        'Consider moving <%= vite_javascript_tag "inertia.jsx" %> to the Inertia-specific layout instead.'
+      'If you see this error, it probably means you loaded Inertia.js on non-Inertia pages.\n' +
+      'Consider moving <%= vite_javascript_tag "inertia.jsx" %> to the Inertia-specific layout instead.'
     )
   }
 })

@@ -4,13 +4,13 @@ require 'spec_helper'
 require 'simplecov'
 
 SimpleCov.start 'rails' do
-  # Группы фильтров, чтобы отчет был чище
+  # Filter groups to keep the report clean
   add_filter '/bin/'
   add_filter '/db/'
   add_filter '/spec/'
   add_filter '/config/'
 
-  # Группировка файлов в отчете (для красоты)
+  # Group files in the report (for better presentation)
   add_group 'Controllers', 'app/controllers'
   add_group 'Models', 'app/models'
   add_group 'Mailers', 'app/mailers'

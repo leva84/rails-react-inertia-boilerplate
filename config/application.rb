@@ -45,17 +45,17 @@ module RailsReactInertiaBoilerplate
     config.generators do |g|
       g.test_framework :rspec,
                        fixtures: true,
-                       view_specs: false,    # Inertia рулит вьюхами
-                       helper_specs: false,  # Логика в моделях/сервисах
-                       routing_specs: false, # Обычно достаточно request specs
-                       request_specs: true   # Главный тест API/Controller
+                       view_specs: false,    # Inertia handles views
+                       helper_specs: false,  # Logic goes into models/services
+                       routing_specs: false, # Request specs are usually sufficient
+                       request_specs: true   # Main API/Controller testing tool
 
       g.fixture_replacement :factory_bot, dir: 'spec/factories'
 
       g.stylesheets false      # Tailwind (Vite)
       g.javascripts false      # React (Vite)
-      g.helper false           # Хелперы редко нужны в Inertia-мире
-      g.channel assets: false  # Без лишних файлов для каналов
+      g.helper false           # Helpers are rarely needed in the Inertia world
+      g.channel assets: false  # No extra files for channels
     end
   end
 end

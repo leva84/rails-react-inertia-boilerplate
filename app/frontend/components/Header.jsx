@@ -11,7 +11,7 @@ export default function Header() {
     <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between">
-          {/* Лого + Десктоп */}
+          {/* Logo + Desktop */}
           <div className="flex">
             <div className="flex flex-shrink-0 items-center">
               <Link
@@ -31,7 +31,7 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Гамбургер */}
+          {/* Hamburger */}
           <BurgerButton
             isOpen={isMobileMenuOpen}
             onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -39,7 +39,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Мобильное меню */}
+      {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="border-t border-gray-200 md:hidden">
           <div className="space-y-1 pt-2 pb-3">
