@@ -9,56 +9,56 @@ gem 'puma', '>= 5.0'
 gem 'rails', '~> 8.0.4'
 
 # --- Rails 8 Solid Stack (No Redis needed!) ---
-# Эти гемы позволяют хранить кэш, очереди и сокеты прямо в Postgres.
-# Это идеально для старта - не нужно поднимать Redis.
+# These gems allow storing cache, queues, and sockets directly in Postgres.
+# Perfect for starting - no need to spin up Redis.
 gem 'solid_cable'
 gem 'solid_cache'
 gem 'solid_queue'
 
 # --- Performance & Deploy ---
-# Kamal - для деплоя в Docker
+# Kamal - for Docker deployment
 gem 'kamal', require: false
 
-# Thruster - Go-прокси перед Puma.
-# Опционально, но рекомендуется: он ускоряет отдачу статики (JS/CSS бандлов от Vite)
-# и сжимает ответы (Gzip/Brotli), делая контейнер самодостаточным без Nginx.
+# Thruster - Go-proxy in front of Puma.
+# Optional but recommended: it accelerates static asset delivery (JS/CSS bundles from Vite)
+# and compresses responses (Gzip/Brotli), making the container self-sufficient without Nginx.
 gem 'thruster', require: false
 
 # --- Core Frontend Stack ---
-# Мост для React-компонентов вместо Rails-вьюх
+# Bridge for React components instead of Rails views
 gem 'inertia_rails'
-# Интеграция Vite (сборщик) с Rails
+# Integration of Vite (bundler) with Rails
 gem 'vite_rails'
 
 # --- Utils ---
-# Данные о часовых поясах (нужен для Windows/Docker,
-# на Mac/Linux часто опционален, но лучше оставить)
+# Timezone data (needed for Windows/Docker,
+# often optional on Mac/Linux, but better to keep)
 gem 'tzinfo-data', platforms: %i[windows jruby]
 
 group :development, :test do
-  # Продвинутая консоль дебаггинга (лучше чем puts)
-  gem 'brakeman', require: false # Сканер уязвимостей
+  # Advanced debugging console (better than puts)
+  gem 'brakeman', require: false # Vulnerability scanner
   gem 'debug', platforms: %i[mri windows], require: 'debug/prelude'
 
   # --- Testing Stack (RSpec) ---
-  gem 'factory_bot_rails' # Фабрики данных
-  gem 'faker'             # Генерация фейковых данных
-  gem 'rspec-rails'       # Стандарт де-факто для тестов
+  gem 'factory_bot_rails' # Data factories
+  gem 'faker'             # Fake data generation
+  gem 'rspec-rails'       # The de facto standard for tests
 
-  # Линтеры (Опционально: мы будем настраивать их детально позже)
+  # Linters (Optional: we will configure them in detail later)
   gem 'rubocop-performance', require: false
   gem 'rubocop-rails', require: false
   gem 'rubocop-rspec', require: false
 
-  # Консоль для любителей (опционально)
+  # Console for enthusiasts (optional)
   gem 'pry'
 end
 
 group :development do
-  gem 'annotate' # Документация схемы БД в моделях
-  gem 'web-console' # Интерактивная консоль в браузере
+  gem 'annotate' # DB schema documentation in models
+  gem 'web-console' # Interactive console in the browser
 end
 
 group :test do
-  gem 'simplecov', require: false # Покрытие кода
+  gem 'simplecov', require: false # Code coverage
 end

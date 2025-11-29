@@ -11,7 +11,7 @@ export default function BurgerButton({ isOpen, onToggle }) {
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          {/* Рисуем разные иконки в зависимости от пропса isOpen */}
+          {/* Render different icons based on the isOpen prop */}
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
