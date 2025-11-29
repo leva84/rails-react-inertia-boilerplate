@@ -7,7 +7,7 @@ afterEach(() => {
   cleanup()
 })
 
-// Global mocks (if needed). For example, for ResizeObserver, which is missing in jsdom.
+// Globally mocks (if needed). For example, for ResizeObserver, which is missing in jsdom.
 globalThis.ResizeObserver = class ResizeObserver {
   observe() {}
   unobserve() {}
