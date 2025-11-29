@@ -3,7 +3,6 @@ default: &default
   encoding: unicode
   pool: <%= ENV.fetch("RAILS_DATABASE_MAX_THREADS") { 5 } %>
 
-
 development:
   <<: *default
   database: your_project_name_development

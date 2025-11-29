@@ -2,3 +2,38 @@
 
 @plugin '@tailwindcss/typography';
 @plugin '@tailwindcss/forms';
+
+@layer components {
+  /* Ссылки десктопного меню */
+  .nav-link {
+    @apply inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition duration-150 ease-in-out;
+  }
+
+  .nav-link-active {
+    @apply border-indigo-500 text-gray-900;
+  }
+
+  .nav-link-inactive {
+    @apply border-transparent text-gray-500 hover:border-indigo-500 hover:text-gray-900;
+  }
+
+  /* Ссылки мобильного меню */
+  .mobile-nav-link {
+    @apply block border-l-4 py-2 pr-4 pl-3 text-base font-medium transition duration-150 ease-in-out;
+  }
+
+  .mobile-nav-link-active {
+    @apply border-indigo-500 bg-indigo-50 text-indigo-700;
+  }
+
+  .mobile-nav-link-inactive {
+    @apply border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800;
+  }
+
+  /* Бургер меню */
+  .burger-btn {
+    @apply inline-flex items-center justify-center rounded-md p-2 text-gray-400;
+    @apply hover:bg-gray-100 hover:text-gray-500 focus:ring-2 focus:outline-none focus:ring-inset;
+    @apply transition duration-150 ease-in-out focus:ring-indigo-500;
+  }
+}
