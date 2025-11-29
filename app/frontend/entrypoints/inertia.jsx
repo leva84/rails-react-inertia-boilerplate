@@ -15,7 +15,7 @@ createInertiaApp({
     }
 
     // Магия: Если у страницы нет своего layout, назначаем MainLayout
-    page.default.layout = page.default.layout || ((page) => <MainLayout>{ page }</MainLayout>)
+    page.default.layout = page.default.layout || ((page) => <MainLayout>{page}</MainLayout>)
 
     return page
   },
@@ -48,4 +48,4 @@ createInertiaApp({
         'Consider moving <%= vite_javascript_tag "inertia.jsx" %> to the Inertia-specific layout instead.'
     )
   }
-});
+})
